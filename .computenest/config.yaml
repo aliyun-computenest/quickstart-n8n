@@ -77,9 +77,9 @@ ImageBuilder:
         sudo systemctl enable --now docker.service
 
         # 安装并启动 n8n
-        mkdir -p /root/application/ && cd /usr/local/application/
+        mkdir -p /root/application/ && cd /root/application/
         git clone https://github.com/aliyun-computenest/quickstart-n8n.git
-        cd /root/application/n8n-hosting/docker-compose/withPostgresAndWorker
+        cd /n8n-hosting/docker-compose/withPostgresAndWorker
 
         wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
         yq eval '.x-shared.environment += ["N8N_SECURE=1"]' ./docker-compose.yml -i
