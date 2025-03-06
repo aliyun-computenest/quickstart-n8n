@@ -82,7 +82,7 @@ ImageBuilder:
         cd n8n-hosting/docker-compose/withPostgresAndWorker
 
         wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
-        yq eval '.x-shared.environment += ["N8N_SECURE_COOKIE=1"]' ./docker-compose.yml -i
+        yq eval '.x-shared.environment += ["N8N_SECURE_COOKIE=false"]' ./docker-compose.yml -i
 
         docker compose up -d
         sleep 30
