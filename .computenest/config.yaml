@@ -1,24 +1,78 @@
 Service:
-  RegionId: cn-hangzhou
   DeployType: ros
   DeployMetadata:
-    ServiceInstanceNameRule:
-      Prefix: n8n
     SupplierDeployMetadata:
       ArtifactRelation:
-        'centos_7_9_x64_20G_alibase_20240403.vhd':
-          ArtifactId: ${Artifact.EcsImage.ArtifactId}
-          ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
+        centos_7_9_x64_20G_alibase_20240403.vhd:
+          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
+      SupplierTemplateConfigs:
+        - Name: 单机版
+          Url: ros_templates/template.yaml
+          PredefinedParameters:
+            - Name: 套餐一
+              Parameters:
+                PayType: PostPaid
+                EcsInstanceType:
+                  - ecs.u1-c1m2.xlarge
+              OrderList:
+                - NEST_TRIAL_DEFAULT_KEY
+                - EcsInstanceType
+                - PayType
+              TrialType: TrialOnly
+              Type: Normal
     TemplateConfigs:
       - Name: 单机版
-        Url: 'ros_templates/template.yaml'
+        Url: ros_templates/template.yaml
+        PredefinedParameters:
+          - Name: 套餐一
+            Parameters:
+              PayType: PostPaid
+              EcsInstanceType:
+                - ecs.u1-c1m2.xlarge
+            OrderList:
+              - NEST_TRIAL_DEFAULT_KEY
+              - EcsInstanceType
+              - PayType
+            TrialType: TrialOnly
+            Type: Normal
+        TrialHiddenParameterKeys:
+          - VpcId
+          - PayPeriod
+          - VSwitchId
+          - PayPeriodUnit
+          - PayType
+        CreateFromExistInstanceParameterKeys:
+          - VpcId
+          - PayPeriod
+          - VSwitchId
+          - PayPeriodUnit
+          - PayType
+        DeployScene: ECS
+        OutputConfigs:
+          - OutputKey: __biubiu__
+            EnableWebProxy: false
+    NetworkMetadata:
+      EnablePrivateVpcConnection: false
+      PrivateVpcConnectionType: PocCreate
+    ServiceInstanceNameRule:
+      Prefix: n8n
+      UseDefaultValue: false
+  OperationMetadata:
+    SupportBackup: false
+    PrometheusConfigMap:
+      单机版:
+        EnablePrometheus: false
   ServiceType: private
   ServiceInfo:
     Locale: zh-CN
-    ShortDescription: n8n deploy
-    Image: 'resources/icons/service_logo.jpg'
+    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI 功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
+    Image: resources/icons/service_logo.png
+    Name: n8n社区版
+  ShareType: Public
+  ApprovalType: Manual
 Artifact:
-  EcsImage:
+  Artifact_1:
     ArtifactType: EcsImage
     ArtifactName: n8n
     Description: n8n
