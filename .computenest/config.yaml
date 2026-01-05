@@ -95,46 +95,6 @@ Artifact:
       RegionId: ap-southeast-1
       CommandType: RunShellScript
       CommandContent: |-
-        #!/bin/bash
-        # 升级基础组件：
-        yum check-update
-        yum -y upgrade --security
-        yum -y upgrade-minimal
-
-        # 安装docker-ce
-        yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-        yum makecache
-        yum install -y curl git docker-ce
-        mkdir -p /etc/docker/
-        echo '{
-            "default-address-pools": [
-                {
-                    "base": "10.255.0.0/16",
-                    "size": 24
-                }
-            ]
-        }' > /etc/docker/daemon.json
-
-        prefixChinaRegion="cn-"
-        region=$(curl -s http://100.100.100.200/latest/meta-data/region-id)
-
-        if [[ ${region} == ${prefixChinaRegion}* && ${region} != "cn-hongkong" ]]; then
-          echo '{
-              "default-address-pools": [
-                  {
-                      "base": "10.255.0.0/16",
-                      "size": 24
-                  }
-              ],
-              "registry-mirrors": [
-                  "https://mirrors-ssl.aliyuncs.com/"
-              ]
-          }' > /etc/docker/daemon.json
-        fi
-
-        sudo systemctl enable --now docker.socket
-        sudo systemctl enable --now docker.service
-
         # 安装并启动 n8n
         mkdir -p /root/application/ && cd /root/application/
         git clone https://github.com/n8n-io/n8n-hosting.git
