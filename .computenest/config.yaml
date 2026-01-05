@@ -1,41 +1,62 @@
 Service:
+  RegionId: cn-hangzhou
   DeployType: ros
+  OperationMetadata:
+    StatusOperationConfigs:
+    - TemplateName: 单机版
+      SupportOperations:
+      - Start
+      - Stop
+      - Restart
+    SupportBackup: true
+    ModifyParametersConfig:
+    - TemplateName: 单机版
+      Operation:
+      - Name: 变更ECS实例密码
+        Description: 变更ECS实例密码
+        Type: Custom
+        Parameters:
+        - InstancePassword
   DeployMetadata:
     SupplierDeployMetadata:
       ArtifactRelation:
-        centos_7_9_x64_20G_alibase_20240403.vhd:
-          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
-          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
+        ecs_image_quickstart-n8n:
+          ArtifactId: ${Artifact.EcsImage.ArtifactId}
+          ArtifactVersion: draft
       SupplierTemplateConfigs:
       - Name: 单机版
         Url: ros_templates/template.yaml
-        PredefinedParameters:
-        - Name: 套餐一
-          Parameters:
-            PayType: PostPaid
-            EcsInstanceType:
-            - ecs.u1-c1m2.xlarge
-          OrderList:
-          - NEST_TRIAL_DEFAULT_KEY
-          - EcsInstanceType
-          - PayType
-          TrialType: TrialOnly
-          Type: Normal
+        AllowedRegions:
+        - ap-southeast-1
+        - cn-hangzhou
+        - cn-huhehaote
+        - cn-shanghai
+        - cn-qingdao
+        - cn-beijing
+        - cn-zhangjiakou
+        - cn-wulanchabu
+        - cn-shenzhen
+        - cn-heyuan
+        - cn-guangzhou
+        - cn-chengdu
+        - cn-hongkong
+        - ap-southeast-3
+        - ap-southeast-5
+        - ap-southeast-6
+        - ap-southeast-7
+        - ap-northeast-1
+        - ap-northeast-2
+        - eu-central-1
+        - eu-west-1
+        - us-west-1
+        - us-east-1
+        - me-central-1
+        - me-east-1
     TemplateConfigs:
     - Name: 单机版
       Url: ros_templates/template.yaml
-      PredefinedParameters:
-      - Name: 套餐一
-        Parameters:
-          PayType: PostPaid
-          EcsInstanceType:
-          - ecs.u1-c1m2.xlarge
-        OrderList:
-        - NEST_TRIAL_DEFAULT_KEY
-        - EcsInstanceType
-        - PayType
-        TrialType: TrialOnly
-        Type: Normal
+      AllowedRegions:
+      - ap-southeast-1
       TrialHiddenParameterKeys:
       - VpcId
       - PayPeriod
@@ -46,101 +67,81 @@ Service:
       - VpcId
       - PayPeriod
       - VSwitchId
+      - VpcOption
       - PayPeriodUnit
       - PayType
-      DeployScene: ECS
-      OutputConfigs:
-      - OutputKey: __biubiu__
-        EnableWebProxy: false
-    NetworkMetadata:
-      EnablePrivateVpcConnection: false
-      PrivateVpcConnectionType: PocCreate
-    ServiceInstanceNameRule:
-      Prefix: n8n
-      UseDefaultValue: false
-  OperationMetadata:
-    SupportBackup: false
-    PrometheusConfigMap:
-      单机版:
-        EnablePrometheus: false
   ServiceType: private
   ServiceInfo:
-    Locale: zh-CN
-    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI
-      功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
-    Image: resources/icons/service_logo.png
+  - Locale: zh-CN
     Name: n8n社区版
+    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI 功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
+    Image: resources/icons/service_logo.png
     Softwares:
     - Name: n8n
-      Version: vn8n@2.1.5
-  ShareType: Public
-  ApprovalType: Manual
+      Version: v2.1.5
 Artifact:
-  Artifact_1:
-    ArtifactType: EcsImage
-    ArtifactName: n8n
-    Description: n8n
-    ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImage.RegionId}
-      ImageId: ${ImageBuilder.EcsImage.SourceImageId}
-ImageBuilder:
   EcsImage:
-    RegionId: ap-southeast-1
-    SourceImageId: aliyun_3_x64_20G_alibase_20240819.vhd
-    SystemDiskSize: 40
-    InstanceType: ecs.c6.large
-    InternetMaxBandwidthOut: 10
-    CommandType: RunShellScript
-    Timeout: 10800
-    Tags: []
-    CommandContent: |-
-      #!/bin/bash
-      # 升级基础组件：
-      yum check-update
-      yum -y upgrade --security
-      yum -y upgrade-minimal
+    ArtifactType: EcsImage
+    ArtifactName: ecs_image_quickstart-n8n
+    Description: quickstart-n8n EcsImage
+    SupportRegionIds:
+    - ap-southeast-1
+    ArtifactBuildProperty:
+      CodeRepo:
+        Platform: github
+        Owner: LYH-RAIN
+        RepoName: quickstart-n8n
+        Branch: main
+      RegionId: ap-southeast-1
+      CommandType: RunShellScript
+      CommandContent: |-
+        #!/bin/bash
+        # 升级基础组件：
+        yum check-update
+        yum -y upgrade --security
+        yum -y upgrade-minimal
 
-      # 安装docker-ce
-      yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-      yum makecache
-      yum install -y curl git docker-ce
-      mkdir -p /etc/docker/
-      echo '{
-          "default-address-pools": [
-              {
-                  "base": "10.255.0.0/16",
-                  "size": 24
-              }
-          ]
-      }' > /etc/docker/daemon.json
-
-      prefixChinaRegion="cn-"
-      region=$(curl -s http://100.100.100.200/latest/meta-data/region-id)
-
-      if [[ ${region} == ${prefixChinaRegion}* && ${region} != "cn-hongkong" ]]; then
+        # 安装docker-ce
+        yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+        yum makecache
+        yum install -y curl git docker-ce
+        mkdir -p /etc/docker/
         echo '{
             "default-address-pools": [
                 {
                     "base": "10.255.0.0/16",
                     "size": 24
                 }
-            ],
-            "registry-mirrors": [
-                "https://mirrors-ssl.aliyuncs.com/"
             ]
         }' > /etc/docker/daemon.json
-      fi
 
-      sudo systemctl enable --now docker.socket
-      sudo systemctl enable --now docker.service
+        prefixChinaRegion="cn-"
+        region=$(curl -s http://100.100.100.200/latest/meta-data/region-id)
 
-      # 安装并启动 n8n
-      mkdir -p /root/application/ && cd /root/application/
-      git clone https://github.com/n8n-io/n8n-hosting.git
-      cd n8n-hosting/docker-compose/withPostgresAndWorker
+        if [[ ${region} == ${prefixChinaRegion}* && ${region} != "cn-hongkong" ]]; then
+          echo '{
+              "default-address-pools": [
+                  {
+                      "base": "10.255.0.0/16",
+                      "size": 24
+                  }
+              ],
+              "registry-mirrors": [
+                  "https://mirrors-ssl.aliyuncs.com/"
+              ]
+          }' > /etc/docker/daemon.json
+        fi
 
-      wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
-      yq eval '.x-shared.environment += ["N8N_SECURE_COOKIE=false"]' ./docker-compose.yml -i
+        sudo systemctl enable --now docker.socket
+        sudo systemctl enable --now docker.service
 
-      docker compose up -d
-      sleep 30
+        # 安装并启动 n8n
+        mkdir -p /root/application/ && cd /root/application/
+        git clone https://github.com/n8n-io/n8n-hosting.git
+        cd n8n-hosting/docker-compose/withPostgresAndWorker
+
+        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        yq eval '.x-shared.environment += ["N8N_SECURE_COOKIE=false"]' ./docker-compose.yml -i
+
+        docker compose up -d
+        sleep 30
