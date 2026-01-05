@@ -7,51 +7,51 @@ Service:
           ArtifactId: ${Artifact.Artifact_1.ArtifactId}
           ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
       SupplierTemplateConfigs:
-        - Name: 单机版
-          Url: ros_templates/template.yaml
-          PredefinedParameters:
-            - Name: 套餐一
-              Parameters:
-                PayType: PostPaid
-                EcsInstanceType:
-                  - ecs.u1-c1m2.xlarge
-              OrderList:
-                - NEST_TRIAL_DEFAULT_KEY
-                - EcsInstanceType
-                - PayType
-              TrialType: TrialOnly
-              Type: Normal
-    TemplateConfigs:
       - Name: 单机版
         Url: ros_templates/template.yaml
         PredefinedParameters:
-          - Name: 套餐一
-            Parameters:
-              PayType: PostPaid
-              EcsInstanceType:
-                - ecs.u1-c1m2.xlarge
-            OrderList:
-              - NEST_TRIAL_DEFAULT_KEY
-              - EcsInstanceType
-              - PayType
-            TrialType: TrialOnly
-            Type: Normal
-        TrialHiddenParameterKeys:
-          - VpcId
-          - PayPeriod
-          - VSwitchId
-          - PayPeriodUnit
+        - Name: 套餐一
+          Parameters:
+            PayType: PostPaid
+            EcsInstanceType:
+            - ecs.u1-c1m2.xlarge
+          OrderList:
+          - NEST_TRIAL_DEFAULT_KEY
+          - EcsInstanceType
           - PayType
-        CreateFromExistInstanceParameterKeys:
-          - VpcId
-          - PayPeriod
-          - VSwitchId
-          - PayPeriodUnit
-          - PayType
-        DeployScene: ECS
-        OutputConfigs:
-          - OutputKey: __biubiu__
-            EnableWebProxy: false
+          TrialType: TrialOnly
+          Type: Normal
+    TemplateConfigs:
+    - Name: 单机版
+      Url: ros_templates/template.yaml
+      PredefinedParameters:
+      - Name: 套餐一
+        Parameters:
+          PayType: PostPaid
+          EcsInstanceType:
+          - ecs.u1-c1m2.xlarge
+        OrderList:
+        - NEST_TRIAL_DEFAULT_KEY
+        - EcsInstanceType
+        - PayType
+        TrialType: TrialOnly
+        Type: Normal
+      TrialHiddenParameterKeys:
+      - VpcId
+      - PayPeriod
+      - VSwitchId
+      - PayPeriodUnit
+      - PayType
+      CreateFromExistInstanceParameterKeys:
+      - VpcId
+      - PayPeriod
+      - VSwitchId
+      - PayPeriodUnit
+      - PayType
+      DeployScene: ECS
+      OutputConfigs:
+      - OutputKey: __biubiu__
+        EnableWebProxy: false
     NetworkMetadata:
       EnablePrivateVpcConnection: false
       PrivateVpcConnectionType: PocCreate
@@ -66,9 +66,13 @@ Service:
   ServiceType: private
   ServiceInfo:
     Locale: zh-CN
-    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI 功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
+    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI
+      功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
     Image: resources/icons/service_logo.png
     Name: n8n社区版
+    Softwares:
+    - Name: n8n
+      Version: vn8n@2.1.5
   ShareType: Public
   ApprovalType: Manual
 Artifact:
@@ -88,55 +92,55 @@ ImageBuilder:
     InternetMaxBandwidthOut: 10
     CommandType: RunShellScript
     Timeout: 10800
-    Tags: [ ]
+    Tags: []
     CommandContent: |-
-        #!/bin/bash
-        # 升级基础组件：
-        yum check-update
-        yum -y upgrade --security
-        yum -y upgrade-minimal
+      #!/bin/bash
+      # 升级基础组件：
+      yum check-update
+      yum -y upgrade --security
+      yum -y upgrade-minimal
 
-        # 安装docker-ce
-        yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-        yum makecache
-        yum install -y curl git docker-ce
-        mkdir -p /etc/docker/
+      # 安装docker-ce
+      yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+      yum makecache
+      yum install -y curl git docker-ce
+      mkdir -p /etc/docker/
+      echo '{
+          "default-address-pools": [
+              {
+                  "base": "10.255.0.0/16",
+                  "size": 24
+              }
+          ]
+      }' > /etc/docker/daemon.json
+
+      prefixChinaRegion="cn-"
+      region=$(curl -s http://100.100.100.200/latest/meta-data/region-id)
+
+      if [[ ${region} == ${prefixChinaRegion}* && ${region} != "cn-hongkong" ]]; then
         echo '{
             "default-address-pools": [
                 {
                     "base": "10.255.0.0/16",
                     "size": 24
                 }
+            ],
+            "registry-mirrors": [
+                "https://mirrors-ssl.aliyuncs.com/"
             ]
         }' > /etc/docker/daemon.json
+      fi
 
-        prefixChinaRegion="cn-"
-        region=$(curl -s http://100.100.100.200/latest/meta-data/region-id)
+      sudo systemctl enable --now docker.socket
+      sudo systemctl enable --now docker.service
 
-        if [[ ${region} == ${prefixChinaRegion}* && ${region} != "cn-hongkong" ]]; then
-          echo '{
-              "default-address-pools": [
-                  {
-                      "base": "10.255.0.0/16",
-                      "size": 24
-                  }
-              ],
-              "registry-mirrors": [
-                  "https://mirrors-ssl.aliyuncs.com/"
-              ]
-          }' > /etc/docker/daemon.json
-        fi
+      # 安装并启动 n8n
+      mkdir -p /root/application/ && cd /root/application/
+      git clone https://github.com/n8n-io/n8n-hosting.git
+      cd n8n-hosting/docker-compose/withPostgresAndWorker
 
-        sudo systemctl enable --now docker.socket
-        sudo systemctl enable --now docker.service
+      wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+      yq eval '.x-shared.environment += ["N8N_SECURE_COOKIE=false"]' ./docker-compose.yml -i
 
-        # 安装并启动 n8n
-        mkdir -p /root/application/ && cd /root/application/
-        git clone https://github.com/n8n-io/n8n-hosting.git
-        cd n8n-hosting/docker-compose/withPostgresAndWorker
-
-        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
-        yq eval '.x-shared.environment += ["N8N_SECURE_COOKIE=false"]' ./docker-compose.yml -i
-
-        docker compose up -d
-        sleep 30
+      docker compose up -d
+      sleep 30
