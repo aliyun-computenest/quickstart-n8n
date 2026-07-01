@@ -74,11 +74,12 @@ Service:
   ServiceInfo:
   - Locale: zh-CN
     Name: n8n社区版
-    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI 功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
+    ShortDescription: n8n 是一个工作流自动化平台，它为技术团队提供了代码灵活性和无代码速度。n8n 拥有 400 多个集成、原生 AI
+      功能和公平代码许可证，让您可以构建强大的自动化功能，同时完全控制您的数据和部署。
     Image: resources/icons/service_logo.png
     Softwares:
     - Name: n8n
-      Version: v2.1.5
+      Version: vn8n@2.28.3
 Artifact:
   EcsImage:
     ArtifactType: EcsImage
