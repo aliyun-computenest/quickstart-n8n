@@ -79,7 +79,7 @@ Service:
     Image: resources/icons/service_logo.png
     Softwares:
     - Name: n8n
-      Version: vn8n@2.30.4
+      Version: vn8n@2.30.6
 Artifact:
   EcsImage:
     ArtifactType: EcsImage
